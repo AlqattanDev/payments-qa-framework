@@ -8,6 +8,8 @@
 **▶ Live interactive demo: [exidex.dev/payments-qa](https://exidex.dev/payments-qa)** — watch a
 test drive the app and verify the ledger, right in your browser.
 
+![A Cucumber scenario driving the app: the form fills itself, the payment sends, and every step lights green with live ledger assertions](docs/demo.gif)
+
 An end-to-end test-automation framework built **from the ground up** for a fintech
 payments platform. It drives a real (if small) payments app — sign-in, money
 transfers, a validation gauntlet, a SQLite ledger — and verifies behaviour at

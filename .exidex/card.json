@@ -4,7 +4,7 @@
   "tagline": "Watch an automated test drive a live payments app — Playwright + Cucumber, verified down to the ledger.",
   "kind": "landing",
   "repo": "https://github.com/AlqattanDev/payments-qa-framework",
-  "thumb": "/payments-qa/thumb.svg",
+  "thumb": "/payments-qa/thumb.png",
   "accent": "#36c46f",
   "order": 20,
   "hidden": false,
