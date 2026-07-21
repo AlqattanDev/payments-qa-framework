@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en" style="--accent:#36c46f">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payments QA Framework — watch a test drive the app</title>
+  <meta name="description" content="An end-to-end automation framework for a fintech payments platform. Watch a Cucumber + Playwright test drive a live app and verify the ledger." />
+
+  <!-- Theme boot before paint (same keys as the exidex SPA). -->
+  <script>(function(){try{var t=localStorage.getItem("exidex-theme");var r=JSON.parse(localStorage.getItem("exidex-restored")||"[]");if(t==="dark"||(Array.isArray(r)&&r.indexOf("dark-mode")!==-1))document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()</script>
+
+  <!-- Minimal fallback FIRST so the shared stylesheet wins. -->
+  <style>
+    body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #23251d; background: #e5e7e0; }
+    .sc-window { max-width: 960px; margin: 2rem auto; background: #fdfdf8; }
+    .sc-body { padding: 2rem 1.5rem; }
+  </style>
+  <link rel="stylesheet" href="/_showcase/tokens.css" />
+  <link rel="stylesheet" href="/_showcase/style.css" />
+
+  <style>
+    /* ── Page-local design. Scoped under .qa- so nothing leaks into the shared
+       chrome. Colours come from exidex tokens; green accent = "tests pass". ── */
+    :root {
+      --qa-pass: #36c46f;
+      --qa-fail: #f54e00;
+      --qa-run: #eb9d2a;
+      --qa-ink: var(--light-12);
+      --qa-dim: var(--light-9);
+      --qa-line: var(--light-8);
+      --qa-panel: var(--light-1);
+      --qa-inset: var(--light-2);
+    }
+
+    .qa-lead { font-size: 1.05rem; color: var(--qa-dim); max-width: 62ch; }
+
+    /* Section rhythm */
+    .qa-section { margin-top: 2.6rem; }
+    .qa-section > h2 { font-size: 1.35rem; margin: 0 0 .3rem; }
+    .qa-section > .qa-sub { color: var(--qa-dim); margin: 0 0 1.1rem; font-size: .95rem; }
+
+    /* ── The lab: split app ↔ spec ─────────────────────────────────────────── */
+    .qa-lab {
+      border: 1px solid var(--qa-line);
+      border-radius: 14px;
+      background: var(--qa-panel);
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+    }
+    .qa-toolbar {
+      display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+      padding: .7rem .9rem; border-bottom: 1px solid var(--qa-line);
+      background: var(--qa-inset);
+    }
+    .qa-scn { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .qa-tab {
+      font: inherit; font-size: .82rem; cursor: pointer;
+      padding: .3rem .7rem; border-radius: 999px;
+      border: 1px solid var(--qa-line); background: transparent; color: var(--qa-ink);
+    }
+    .qa-tab[aria-selected="true"] { background: var(--qa-ink); color: var(--qa-panel); border-color: var(--qa-ink); }
+    .qa-run {
+      margin-left: auto; font: inherit; font-weight: 600; font-size: .85rem; cursor: pointer;
+      padding: .4rem .95rem; border-radius: 8px; border: none;
+      background: var(--qa-pass); color: #05130b;
+    }
+    .qa-run:disabled { opacity: .55; cursor: default; }
+    .qa-run.secondary { background: transparent; color: var(--qa-ink); border: 1px solid var(--qa-line); }
+
+    .qa-split { display: grid; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 760px) { .qa-split { grid-template-columns: 1fr; } }
+
+    /* Left: the live app twin */
+    .qa-app { position: relative; padding: 1rem 1.1rem; border-right: 1px solid var(--qa-line); }
+    @media (max-width: 760px) { .qa-app { border-right: none; border-bottom: 1px solid var(--qa-line); } }
+    .qa-app-bar { display: flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .9rem; margin-bottom: .8rem; }
+    .qa-app-bar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--qa-pass); }
+    .qa-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--qa-dim); margin: .8rem 0 .3rem; }
+
+    .qa-accts { display: grid; gap: .3rem; }
+    .qa-acct { display: flex; justify-content: space-between; font-size: .84rem; padding: .28rem .5rem; border-radius: 7px; background: var(--qa-inset); }
+    .qa-acct .bal { font-variant-numeric: tabular-nums; font-weight: 600; transition: color .3s; }
+    .qa-acct.flash .bal { color: var(--qa-pass); }
+
+    .qa-form { display: grid; gap: .45rem; margin-top: .3rem; }
+    .qa-field { display: grid; gap: .12rem; }
+    .qa-field span { font-size: .68rem; color: var(--qa-dim); }
+    .qa-field input, .qa-field select {
+      font: inherit; font-size: .82rem; padding: .34rem .5rem; border-radius: 7px;
+      border: 1px solid var(--qa-line); background: var(--qa-panel); color: var(--qa-ink);
+    }
+    .qa-field.hl input, .qa-field.hl select { border-color: var(--qa-pass); box-shadow: 0 0 0 3px rgba(54,196,111,.18); }
+    .qa-send {
+      font: inherit; font-weight: 600; font-size: .82rem; cursor: pointer; margin-top: .15rem;
+      padding: .4rem .5rem; border-radius: 7px; border: none; background: var(--qa-ink); color: var(--qa-panel);
+    }
+    .qa-send.press { transform: translateY(1px); filter: brightness(1.3); }
+
+    .qa-status { min-height: 1.2rem; font-size: .8rem; margin-top: .5rem; font-weight: 600; }
+    .qa-status.ok { color: var(--qa-pass); }
+    .qa-status.err { color: var(--qa-fail); }
+
+    .qa-hist { margin-top: .5rem; display: grid; gap: .25rem; }
+    .qa-hist .row { font-size: .76rem; display: flex; justify-content: space-between; padding: .22rem .5rem; border-radius: 6px; background: var(--qa-inset); animation: qa-in .35s ease; }
+    @keyframes qa-in { from { opacity: 0; transform: translateY(4px); } }
+    .qa-hist .row .pill { color: var(--qa-pass); font-weight: 600; }
+
+    /* The "robot" cursor that drives the form */
+    .qa-cursor {
+      position: absolute; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none;
+      opacity: 0; transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .2s; z-index: 5;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+    }
+    .qa-cursor svg { display: block; }
+
+    /* Right: the executable spec */
+    .qa-spec { padding: 1rem 1.1rem; background: var(--qa-inset); }
+    .qa-feature { font-size: .72rem; color: var(--qa-dim); margin: 0 0 .1rem; }
+    .qa-scname { font-weight: 700; font-size: .92rem; margin: 0 0 .7rem; display: flex; align-items: center; gap: .5rem; }
+    .qa-scname .tag { font-size: .62rem; padding: .08rem .4rem; border-radius: 4px; background: rgba(54,196,111,.16); color: var(--qa-pass); text-transform: uppercase; letter-spacing: .05em; }
+
+    .qa-steps { display: grid; gap: .3rem; }
+    .qa-step { display: grid; grid-template-columns: 18px 1fr; gap: .5rem; font-size: .83rem; align-items: start; padding: .18rem 0; opacity: .55; transition: opacity .2s; }
+    .qa-step.active, .qa-step.done, .qa-step.failed { opacity: 1; }
+    .qa-step .ico { width: 18px; height: 18px; display: grid; place-items: center; font-size: .7rem; border-radius: 50%; border: 1.5px solid var(--qa-line); color: var(--qa-dim); margin-top: .08rem; }
+    .qa-step.active .ico { border-color: var(--qa-run); color: var(--qa-run); animation: qa-spin 1s linear infinite; }
+    .qa-step.done .ico { border-color: var(--qa-pass); color: #fff; background: var(--qa-pass); }
+    .qa-step.failed .ico { border-color: var(--qa-fail); color: #fff; background: var(--qa-fail); }
+    @keyframes qa-spin { to { transform: rotate(360deg); } }
+    .qa-step .kw { font-weight: 700; color: var(--qa-ink); }
+    .qa-step .assert { display: block; font-size: .72rem; color: var(--qa-dim); font-family: var(--font-code, monospace); margin-top: .12rem; }
+    .qa-step.done .assert b { color: var(--qa-pass); }
+
+    .qa-verdict { margin-top: .9rem; font-size: .82rem; font-weight: 600; min-height: 1.1rem; }
+    .qa-verdict.pass { color: var(--qa-pass); }
+    .qa-verdict.fail { color: var(--qa-fail); }
+
+    /* ── Terminal / CI card (dark in both themes, like the domain expects) ──── */
+    .qa-term {
+      background: #0d1117; color: #e6edf3; border-radius: 10px; padding: 1rem 1.2rem;
+      font: 13.5px/1.7 var(--font-code, ui-monospace, Menlo, monospace); overflow-x: auto;
+    }
+    .qa-term .p { color: #36c46f; } .qa-term .ok { color: #3fb950; } .qa-term .dim { color: #8b949e; } .qa-term .b { color: #e6edf3; font-weight: 700; }
+    .qa-term hr { border: none; border-top: 1px solid #21262d; margin: .7rem 0; }
+
+    /* ── Pyramid ───────────────────────────────────────────────────────────── */
+    .qa-pyramid { display: grid; gap: .3rem; max-width: 460px; }
+    .qa-tier { display: grid; grid-template-columns: 1fr; padding: .55rem .8rem; border-radius: 8px; color: #05130b; }
+    .qa-tier b { font-size: .86rem; } .qa-tier span { font-size: .74rem; opacity: .82; }
+    .qa-tier.ui  { background: rgba(54,196,111,.35); width: 62%; margin: 0 auto; }
+    .qa-tier.api { background: rgba(54,196,111,.6); width: 82%; margin: 0 auto; }
+    .qa-tier.db  { background: rgba(54,196,111,.92); width: 100%; }
+    html[data-theme="dark"] .qa-tier { color: #05130b; }
+
+    .qa-map { border-collapse: collapse; width: 100%; font-size: .86rem; margin-top: 1rem; }
+    .qa-map th, .qa-map td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--qa-line); }
+    .qa-map th { color: var(--qa-dim); font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; }
+    .qa-map code { font-size: .82rem; }
+
+    .qa-note { font-size: .8rem; color: var(--qa-dim); margin-top: .7rem; }
+    .qa-note b { color: var(--qa-ink); }
+  </style>
+</head>
+
+<body class="sc-desk">
+  <main class="sc-window">
+    <header class="sc-titlebar">
+      <div class="sc-titlebar-dots"><span></span></div>
+      <span class="sc-titlebar-name">payments-qa-framework</span>
+      <div class="sc-titlebar-end">
+        <span class="sc-accent-dot" aria-hidden="true"></span>
+        <a class="sc-close" href="https://exidex.dev/" aria-label="Close — back to the desktop">×</a>
+      </div>
+    </header>
+
+    <div class="sc-body">
+      <p class="sc-kicker">QA · Test Automation</p>
+      <h1 class="sc-title">Payments QA Framework</h1>
+      <p class="sc-tagline">An end-to-end automation suite for a fintech payments platform —
+        it drives the app, checks the screen, and verifies the
+        <span class="sc-marker">ledger of record</span>.</p>
+
+      <div class="sc-pills">
+        <span class="sc-pill">Playwright</span>
+        <span class="sc-pill">Cucumber BDD</span>
+        <span class="sc-pill">Cypress</span>
+        <span class="sc-pill">Selenium</span>
+        <span class="sc-pill">TypeScript</span>
+        <span class="sc-pill">CI green ✓</span>
+      </div>
+
+      <!-- ── THE LAB ──────────────────────────────────────────────────────── -->
+      <section class="qa-section">
+        <h2>Watch a test drive the app</h2>
+        <p class="qa-sub">Pick a scenario and hit Run. The test fills the form, sends the
+          payment, and checks both the screen <em>and</em> the database — live.</p>
+
+        <div class="qa-lab">
+          <div class="qa-toolbar">
+            <div class="qa-scn" id="qa-tabs" role="tablist" aria-label="Scenarios"></div>
+            <button class="qa-run secondary" id="qa-runall" type="button">Run all 3</button>
+            <button class="qa-run" id="qa-run" type="button">▶ Run scenario</button>
+          </div>
+
+          <div class="qa-split">
+            <!-- Left: live app twin -->
+            <div class="qa-app" id="qa-app">
+              <div class="qa-app-bar"><span class="dot"></span> Ledgerline · Alice Rahman</div>
+
+              <div class="qa-label">Accounts</div>
+              <div class="qa-accts" id="qa-accts"></div>
+
+              <div class="qa-label">New payment</div>
+              <form class="qa-form" id="qa-form" onsubmit="return false">
+                <div class="qa-field" data-f="from"><span>From</span>
+                  <select id="f-from"></select></div>
+                <div class="qa-field" data-f="to"><span>To</span>
+                  <input id="f-to" autocomplete="off" /></div>
+                <div class="qa-field" data-f="amount"><span>Amount</span>
+                  <input id="f-amount" autocomplete="off" /></div>
+                <div class="qa-field" data-f="reference"><span>Reference</span>
+                  <input id="f-ref" autocomplete="off" /></div>
+                <button class="qa-send" id="f-send" type="button">Send payment</button>
+              </form>
+
+              <div class="qa-status" id="qa-status"></div>
+
+              <div class="qa-label">History</div>
+              <div class="qa-hist" id="qa-hist"></div>
+
+              <div class="qa-cursor" id="qa-cursor" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16"><path d="M1 1l5 13 2.2-5.3L13.5 6.5 1 1z" fill="#23251d" stroke="#fff" stroke-width="1"/></svg>
+              </div>
+            </div>
+
+            <!-- Right: executable spec -->
+            <div class="qa-spec">
+              <p class="qa-feature">features/payment_transfer.feature</p>
+              <p class="qa-scname"><span id="qa-scname">—</span><span class="tag" id="qa-sctag"></span></p>
+              <div class="qa-steps" id="qa-steps"></div>
+              <div class="qa-verdict" id="qa-verdict"></div>
+            </div>
+          </div>
+        </div>
+        <p class="qa-note"><b>Honest note:</b> this page runs an in-browser twin of the app so
+          the tests can play out in front of you. The real suite drives a real Chromium via
+          Playwright against an Express + SQLite backend — proven by the green CI below, not by
+          this animation.</p>
+      </section>
+
+      <!-- ── REAL RUN / CI ────────────────────────────────────────────────── -->
+      <section class="qa-section">
+        <h2>The real run</h2>
+        <p class="qa-sub">One command boots the app, runs every scenario headless, and tears it down.</p>
+        <div class="qa-term">
+<span class="p">$</span> npm test
+<span class="dim">Booting Ledgerline · launching Chromium · reseeding ledger per scenario…</span>
+................................................................
+<span class="b">15 scenarios</span> (<span class="ok">15 passed</span>)
+<span class="b">64 steps</span> (<span class="ok">64 passed</span>)
+<hr />
+<span class="dim">GitHub Actions · every push &amp; PR</span>
+<span class="ok">✓</span> BDD — Playwright + Cucumber  <span class="dim">(UI · API · DB)</span>
+<span class="ok">✓</span> Cross-tool — Cypress smoke
+<span class="ok">✓</span> Cross-tool — Selenium smoke
+        </div>
+      </section>
+
+      <!-- ── ARCHITECTURE ─────────────────────────────────────────────────── -->
+      <section class="qa-section">
+        <h2>How it's built</h2>
+        <p class="qa-sub">A deliberate test pyramid: many fast checks low down, a few real
+          browser journeys on top. On a payments system, the database is the tie-breaker.</p>
+
+        <div class="qa-pyramid">
+          <div class="qa-tier ui"><b>UI · browser</b><span>Playwright journeys — sign-in, transfers, validation</span></div>
+          <div class="qa-tier api"><b>API · HTTP</b><span>Status &amp; error codes, pinned as a contract</span></div>
+          <div class="qa-tier db"><b>DB · ledger</b><span>Balances + the "total money never changes" invariant</span></div>
+        </div>
+
+        <table class="qa-map">
+          <thead><tr><th>The role asked for</th><th>Where it lives</th></tr></thead>
+          <tbody>
+            <tr><td>Playwright</td><td><code>src/pages</code>, <code>src/api</code>, <code>src/support</code></td></tr>
+            <tr><td>Cucumber (BDD)</td><td><code>features/*.feature</code> + step definitions</td></tr>
+            <tr><td>Cypress</td><td><code>cypress/e2e/smoke.cy.js</code></td></tr>
+            <tr><td>Selenium</td><td><code>selenium/smoke.test.js</code></td></tr>
+            <tr><td>SDLC · CI/CD</td><td><code>.github/workflows/ci.yml</code> — typecheck + all suites</td></tr>
+            <tr><td>RDBMS</td><td><code>src/db/LedgerDb.ts</code> — read-only ledger assertions</td></tr>
+          </tbody>
+        </table>
+        <p class="qa-note">Framework built <b>from the ground up</b>: Page Objects, a custom
+          Cucumber World, per-scenario isolation, multi-environment config, screenshot-on-failure.</p>
+      </section>
+
+      <div class="sc-actions">
+        <a class="sc-btn sc-btn--cta" href="https://github.com/AlqattanDev/payments-qa-framework">View the code on GitHub</a>
+        <a class="sc-btn sc-btn--secondary" href="https://github.com/AlqattanDev/payments-qa-framework/actions/workflows/ci.yml">See CI runs</a>
+        <a class="sc-btn sc-btn--secondary" href="https://github.com/AlqattanDev/payments-qa-framework#readme">Read the README</a>
+      </div>
+
+      <footer class="sc-footer">
+        <p>The Ledgerline app and all data are fictional. MIT licensed.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+  (() => {
+    // ── In-browser twin of the app: the SAME validation rules as app/server.js ──
+    const CUR = new Set(["USD", "EUR", "GBP"]);
+    const BASELINE = {
+      "ACC-1001": { name: "Alice Checking", currency: "USD", balance: 500000, owned: true },
+      "ACC-1002": { name: "Alice Savings",  currency: "USD", balance: 1250000, owned: true },
+      "ACC-1003": { name: "Alice EUR Wallet", currency: "EUR", balance: 800000, owned: true },
+      "ACC-2001": { name: "Bob Checking",   currency: "USD", balance: 30000, owned: false },
+    };
+    let accts = {};
+    let history = [];
+
+    const fmt = (cents, cur) =>
+      new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(cents / 100);
+    const dollars = (cents) => (cents / 100).toFixed(2);
+
+    function validate({ from, to, amountCents, currency, reference }) {
+      if (!from || !to || amountCents == null || !currency) return err("MISSING_FIELD", "required");
+      if (!CUR.has(currency)) return err("UNSUPPORTED_CURRENCY", "not supported");
+      if (!Number.isInteger(amountCents) || amountCents <= 0) return err("INVALID_AMOUNT", "must be positive");
+      if (typeof reference !== "string" || reference.trim().length < 3 || reference.length > 140)
+        return err("INVALID_REFERENCE", "reference 3–140 chars");
+      if (from === to) return err("SAME_ACCOUNT", "Source and destination accounts must differ");
+      const f = accts[from], t = accts[to];
+      if (!f || !t) return err("ACCOUNT_NOT_FOUND", "account does not exist");
+      if (!f.owned) return err("FORBIDDEN", "you do not own the source account");
+      if (f.currency !== currency || t.currency !== currency)
+        return err("CURRENCY_MISMATCH", "both accounts must match the payment currency");
+      if (f.balance < amountCents) return err("INSUFFICIENT_FUNDS", "insufficient funds");
+      return { ok: true };
+    }
+    function err(code, message) { return { ok: false, code, message }; }
+
+    function apply({ from, to, amountCents, currency, reference }) {
+      accts[from].balance -= amountCents;
+      accts[to].balance += amountCents;
+      const id = "PMT-" + Math.floor(Math.random() * 0xffffff).toString(16).toUpperCase().padStart(6, "0");
+      history.unshift({ id, from, to, amountCents, currency, reference, status: "COMPLETED" });
+      return id;
+    }
+
+    function totalCents() { return Object.values(accts).reduce((s, a) => s + a.balance, 0); }
+
+    // ── DOM ──────────────────────────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    const app = $("qa-app"), cursor = $("qa-cursor");
+    const fFrom = $("f-from"), fTo = $("f-to"), fAmt = $("f-amount"), fRef = $("f-ref"), fSend = $("f-send");
+    const statusEl = $("qa-status"), histEl = $("qa-hist"), acctsEl = $("qa-accts");
+    const stepsEl = $("qa-steps"), scnameEl = $("qa-scname"), sctagEl = $("qa-sctag"), verdictEl = $("qa-verdict");
+    const runBtn = $("qa-run"), runAllBtn = $("qa-runall"), tabsEl = $("qa-tabs");
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? Math.min(ms, 60) : ms));
+
+    function resetApp() {
+      accts = JSON.parse(JSON.stringify(BASELINE));
+      history = [];
+      renderAccts(); renderHist();
+      statusEl.className = "qa-status"; statusEl.textContent = "";
+      fTo.value = ""; fAmt.value = ""; fRef.value = "";
+      fFrom.value = "ACC-1001";
+      document.querySelectorAll(".qa-field").forEach((f) => f.classList.remove("hl"));
+    }
+    function renderAccts() {
+      acctsEl.innerHTML = "";
+      for (const [id, a] of Object.entries(accts)) {
+        const d = document.createElement("div");
+        d.className = "qa-acct"; d.dataset.acc = id;
+        d.innerHTML = `<span>${id} · ${a.name}</span><span class="bal">${fmt(a.balance, a.currency)}</span>`;
+        acctsEl.appendChild(d);
+      }
+      fFrom.innerHTML = "";
+      for (const [id, a] of Object.entries(accts)) {
+        if (!a.owned) continue;
+        const o = document.createElement("option");
+        o.value = id; o.textContent = `${id} — ${a.name}`;
+        fFrom.appendChild(o);
+      }
+    }
+    function renderHist() {
+      histEl.innerHTML = "";
+      if (!history.length) { histEl.innerHTML = `<div class="row" style="opacity:.6">No payments yet.</div>`; return; }
+      for (const p of history) {
+        const r = document.createElement("div");
+        r.className = "row";
+        r.innerHTML = `<span>${p.id} · ${fmt(p.amountCents, p.currency)} · ${p.reference}</span><span class="pill">${p.status}</span>`;
+        histEl.appendChild(r);
+      }
+    }
+    function flash(acc) {
+      const el = acctsEl.querySelector(`[data-acc="${acc}"]`);
+      if (!el) return; el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 900);
+    }
+
+    // ── "Robot" driving: move cursor, type, click ──────────────────────────────
+    async function moveTo(el) {
+      const a = app.getBoundingClientRect(), b = el.getBoundingClientRect();
+      const x = b.left - a.left + b.width / 2 - 4, y = b.top - a.top + b.height / 2 - 2;
+      cursor.style.opacity = "1";
+      cursor.style.transform = `translate(${x}px, ${y}px)`;
+      await sleep(reduce ? 60 : 480);
+    }
+    async function type(el, text) {
+      const field = el.closest(".qa-field"); if (field) field.classList.add("hl");
+      el.focus(); el.value = "";
+      for (const ch of text) { el.value += ch; await sleep(34); }
+      await sleep(140);
+    }
+    async function pick(el, value) {
+      const field = el.closest(".qa-field"); if (field) field.classList.add("hl");
+      el.value = value; await sleep(220);
+    }
+    async function press(el) {
+      el.classList.add("press"); await sleep(140); el.classList.remove("press"); await sleep(120);
+    }
+    function clearHl() { document.querySelectorAll(".qa-field").forEach((f) => f.classList.remove("hl")); }
+
+    // The action a "When I send…" step performs: drive the form, then submit → validate.
+    async function driveSend(p, uiAmount) {
+      await moveTo(fFrom); await pick(fFrom, p.from);
+      await moveTo(fTo); await type(fTo, p.to);
+      await moveTo(fAmt); await type(fAmt, uiAmount);
+      await moveTo(fRef); await type(fRef, p.reference);
+      await moveTo(fSend); await press(fSend);
+      clearHl();
+      const res = validate(p);
+      if (res.ok) {
+        apply(p); renderAccts(); renderHist(); flash(p.from); flash(p.to);
+        statusEl.className = "qa-status ok"; statusEl.textContent = `Payment sent · ${p.reference}`;
+      } else {
+        statusEl.className = "qa-status err"; statusEl.textContent = res.message;
+      }
+      return res;
+    }
+
+    // ── Scenarios: each step has a run() that acts and asserts (throws on fail) ──
+    const money = (c) => "$" + dollars(c);
+    const SCENARIOS = [
+      {
+        id: "valid", name: "A valid transfer completes and moves money", tag: "@smoke",
+        steps: (ctx) => {
+          const p = { from: "ACC-1001", to: "ACC-2001", amountCents: 10000, currency: "USD", reference: "Invoice 4471" };
+          return [
+            { kw: "Given", text: "I am signed in as Alice", run: async () => { await moveTo($("qa-accts")); } },
+            { kw: "When", text: 'I send "100.00" USD from ACC-1001 to ACC-2001', run: async () => { ctx.res = await driveSend(p, "100.00"); } },
+            { kw: "Then", text: "the payment is accepted", assert: () => "success shown", run: async () => { if (!ctx.res.ok) throw 0; } },
+            { kw: "And", text: 'it appears in history "Invoice 4471"', run: async () => { if (!history.some(h => h.reference === "Invoice 4471")) throw 0; } },
+            { kw: "And", text: "the ledger balance of ACC-1001 is 4900.00", assertLive: () => `ACC-1001 → ${money(accts["ACC-1001"].balance)}`, run: async () => { if (accts["ACC-1001"].balance !== 490000) throw 0; } },
+            { kw: "And", text: "the total across all accounts is unchanged", assertLive: () => `Σ ${money(totalCents())} = baseline`, run: async () => { if (totalCents() !== ctx.baseline) throw 0; } },
+          ];
+        }
+      },
+      {
+        id: "insufficient", name: "An underfunded transfer is refused", tag: "@ui",
+        steps: (ctx) => {
+          const p = { from: "ACC-1001", to: "ACC-2001", amountCents: 999999900, currency: "USD", reference: "over budget" };
+          return [
+            { kw: "Given", text: "I am signed in as Alice", run: async () => { await moveTo($("qa-accts")); } },
+            { kw: "When", text: 'I send "9,999,999.00" USD from ACC-1001', run: async () => { ctx.res = await driveSend(p, "9999999.00"); } },
+            { kw: "Then", text: 'the payment is rejected — "insufficient funds"', assert: () => "error shown", run: async () => { if (ctx.res.ok || ctx.res.code !== "INSUFFICIENT_FUNDS") throw 0; } },
+            { kw: "And", text: "the ledger balance of ACC-1001 is unchanged", assertLive: () => `ACC-1001 → ${money(accts["ACC-1001"].balance)}`, run: async () => { if (accts["ACC-1001"].balance !== 500000) throw 0; } },
+            { kw: "And", text: "no money moved anywhere", assertLive: () => `Σ ${money(totalCents())} = baseline`, run: async () => { if (totalCents() !== ctx.baseline) throw 0; } },
+          ];
+        }
+      },
+      {
+        id: "currency", name: "A currency mismatch is refused", tag: "@ui",
+        steps: (ctx) => {
+          const p = { from: "ACC-1001", to: "ACC-1003", amountCents: 5000, currency: "USD", reference: "fx swap" };
+          return [
+            { kw: "Given", text: "I am signed in as Alice", run: async () => { await moveTo($("qa-accts")); } },
+            { kw: "When", text: 'I send "50.00" USD into a EUR account (ACC-1003)', run: async () => { ctx.res = await driveSend(p, "50.00"); } },
+            { kw: "Then", text: 'rejected — "match the payment currency"', assert: () => "422 CURRENCY_MISMATCH", run: async () => { if (ctx.res.ok || ctx.res.code !== "CURRENCY_MISMATCH") throw 0; } },
+            { kw: "And", text: "the ledger is untouched", assertLive: () => `Σ ${money(totalCents())} = baseline`, run: async () => { if (totalCents() !== ctx.baseline) throw 0; } },
+          ];
+        }
+      },
+    ];
+
+    let current = 0, running = false;
+
+    function buildTabs() {
+      SCENARIOS.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.className = "qa-tab"; b.type = "button"; b.role = "tab";
+        b.textContent = ["Valid transfer", "Insufficient funds", "Currency mismatch"][i];
+        b.setAttribute("aria-selected", i === current ? "true" : "false");
+        b.onclick = () => { if (running) return; current = i; selectScenario(); };
+        tabsEl.appendChild(b);
+      });
+    }
+    function selectScenario() {
+      [...tabsEl.children].forEach((b, i) => b.setAttribute("aria-selected", i === current ? "true" : "false"));
+      const s = SCENARIOS[current];
+      scnameEl.textContent = s.name; sctagEl.textContent = s.tag;
+      verdictEl.textContent = ""; verdictEl.className = "qa-verdict";
+      resetApp();
+      renderSteps(s.steps({ baseline: totalCents() }));
+    }
+    let liveSteps = [];
+    function renderSteps(steps) {
+      liveSteps = steps; stepsEl.innerHTML = "";
+      steps.forEach((st) => {
+        const row = document.createElement("div");
+        row.className = "qa-step";
+        const assertHtml = st.assert ? `<span class="assert">↳ <b>${st.assert()}</b></span>` :
+          (st.assertLive ? `<span class="assert"></span>` : "");
+        row.innerHTML = `<span class="ico">○</span><span><span class="kw">${st.kw}</span> ${st.text}${assertHtml}</span>`;
+        stepsEl.appendChild(row);
+      });
+    }
+
+    async function runScenario() {
+      if (running) return; running = true;
+      runBtn.disabled = true; runAllBtn.disabled = true; verdictEl.textContent = ""; verdictEl.className = "qa-verdict";
+      const s = SCENARIOS[current];
+      resetApp();
+      const ctx = { baseline: totalCents() };
+      const steps = s.steps(ctx);
+      renderSteps(steps);
+      const rows = [...stepsEl.children];
+      cursor.style.opacity = "0";
+      let ok = true;
+      for (let i = 0; i < steps.length; i++) {
+        rows[i].classList.add("active");
+        rows[i].querySelector(".ico").textContent = "";
+        try {
+          await steps[i].run();
+          await sleep(260);
+          if (steps[i].assertLive) rows[i].querySelector(".assert").innerHTML = `↳ <b>${steps[i].assertLive()}</b> ✓`;
+          rows[i].classList.remove("active"); rows[i].classList.add("done");
+          rows[i].querySelector(".ico").textContent = "✓";
+        } catch (e) {
+          rows[i].classList.remove("active"); rows[i].classList.add("failed");
+          rows[i].querySelector(".ico").textContent = "✗";
+          ok = false; break;
+        }
+      }
+      cursor.style.opacity = "0";
+      verdictEl.className = "qa-verdict " + (ok ? "pass" : "fail");
+      verdictEl.textContent = ok ? "✓ Scenario passed" : "✗ Scenario failed";
+      running = false; runBtn.disabled = false; runAllBtn.disabled = false;
+      return ok;
+    }
+
+    async function runAll() {
+      if (running) return;
+      for (let i = 0; i < SCENARIOS.length; i++) {
+        current = i;
+        [...tabsEl.children].forEach((b, j) => b.setAttribute("aria-selected", j === i ? "true" : "false"));
+        const ok = await runScenario();
+        if (!ok) return;
+        await sleep(500);
+      }
+      verdictEl.className = "qa-verdict pass";
+      verdictEl.textContent = "✓ 3 / 3 scenarios passed — in the real suite: 15 / 15";
+    }
+
+    runBtn.onclick = runScenario;
+    runAllBtn.onclick = runAll;
+    buildTabs();
+    selectScenario();
+  })();
+  </script>
+</body>
+</html>

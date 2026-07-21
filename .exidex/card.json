@@ -1,0 +1,13 @@
+{
+  "slug": "payments-qa",
+  "title": "Payments QA Framework",
+  "tagline": "Watch an automated test drive a live payments app — Playwright + Cucumber, verified down to the ledger.",
+  "kind": "landing",
+  "repo": "https://github.com/AlqattanDev/payments-qa-framework",
+  "thumb": "/payments-qa/thumb.svg",
+  "accent": "#36c46f",
+  "order": 20,
+  "hidden": false,
+  "showcase": "public",
+  "tags": ["testing", "playwright", "cucumber", "bdd", "ci", "typescript"]
+}
