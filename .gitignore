@@ -1,0 +1,11 @@
+node_modules/
+dist/
+reports/
+app/data/
+test-results/
+playwright-report/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+*.log
+.DS_Store

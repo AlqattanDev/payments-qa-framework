@@ -1,0 +1,50 @@
+{
+  "name": "payments-qa-framework",
+  "version": "1.0.0",
+  "description": "End-to-end test-automation framework for a fintech payments platform — Playwright + Cucumber BDD, API and database layers, CI-gated. Built to mirror real payment-platform QA.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "app:start": "node app/server.js",
+    "app:seed": "node app/seed.js",
+    "test": "cucumber-js",
+    "test:smoke": "cucumber-js --tags @smoke",
+    "test:api": "cucumber-js --tags @api",
+    "test:ui": "cucumber-js --tags @ui",
+    "test:cypress": "node scripts/with-app.js npx cypress run",
+    "test:selenium": "node scripts/with-app.js node selenium/smoke.test.js",
+    "report": "node src/support/report.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "test-automation",
+    "playwright",
+    "cucumber",
+    "bdd",
+    "cypress",
+    "selenium",
+    "api-testing",
+    "fintech",
+    "payments",
+    "ci-cd"
+  ],
+  "author": "Ali AlQattan",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.2.0",
+    "@playwright/test": "^1.50.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.13.1",
+    "cypress": "^14.0.3",
+    "playwright": "^1.50.1",
+    "selenium-webdriver": "^4.28.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ledgerline — Payments</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">▤ Ledgerline</div>
+      <div class="session" data-testid="session-bar" hidden>
+        <span data-testid="current-user"></span>
+        <button data-testid="logout-btn" class="link">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Login view -->
+      <section id="login-view" data-testid="login-view" class="card narrow">
+        <h1>Sign in</h1>
+        <form id="login-form" data-testid="login-form">
+          <label>Username
+            <input name="username" data-testid="username" autocomplete="username" />
+          </label>
+          <label>Password
+            <input name="password" type="password" data-testid="password" autocomplete="current-password" />
+          </label>
+          <button type="submit" data-testid="login-submit">Sign in</button>
+          <p class="error" data-testid="login-error" role="alert" hidden></p>
+        </form>
+        <p class="hint">Demo user: <code>alice</code> / <code>Password123!</code></p>
+      </section>
+
+      <!-- Dashboard view -->
+      <section id="dashboard-view" data-testid="dashboard-view" hidden>
+        <div class="grid">
+          <div class="card">
+            <h2>Accounts</h2>
+            <table data-testid="accounts-table">
+              <thead>
+                <tr><th>Account</th><th>Name</th><th>Currency</th><th class="num">Balance</th></tr>
+              </thead>
+              <tbody data-testid="accounts-body"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h2>New payment</h2>
+            <form id="payment-form" data-testid="payment-form">
+              <label>From account
+                <select name="fromAccount" data-testid="from-account"></select>
+              </label>
+              <label>To account
+                <input name="toAccount" data-testid="to-account" placeholder="ACC-2001" />
+              </label>
+              <label>Amount
+                <input name="amount" data-testid="amount" placeholder="100.00" inputmode="decimal" />
+              </label>
+              <label>Currency
+                <select name="currency" data-testid="currency">
+                  <option>USD</option><option>EUR</option><option>GBP</option>
+                </select>
+              </label>
+              <label>Reference
+                <input name="reference" data-testid="reference" placeholder="Invoice 4471" />
+              </label>
+              <button type="submit" data-testid="pay-submit">Send payment</button>
+              <p class="error" data-testid="payment-error" role="alert" hidden></p>
+              <p class="success" data-testid="payment-success" role="status" hidden></p>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Payment history</h2>
+          <table data-testid="history-table">
+            <thead>
+              <tr><th>ID</th><th>From</th><th>To</th><th class="num">Amount</th><th>Reference</th><th>Status</th></tr>
+            </thead>
+            <tbody data-testid="history-body"></tbody>
+          </table>
+          <p class="empty" data-testid="history-empty" hidden>No payments yet.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

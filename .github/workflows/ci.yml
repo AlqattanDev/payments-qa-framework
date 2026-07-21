@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Primary suite: the Playwright + Cucumber BDD tests across the UI, the API,
+  # and the SQLite ledger — plus a strict TypeScript typecheck as the gate.
+  bdd:
+    name: BDD — Playwright + Cucumber (UI · API · DB)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run BDD suite
+        run: npx cucumber-js
+        env:
+          TEST_ENV: ci
+          CI: '1'
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: reports/
+          if-no-files-found: ignore
+
+  # Cross-tool proficiency: the same journeys expressed in Cypress and Selenium,
+  # kept in separate jobs so a single tool's hiccup never masks the primary run.
+  cypress:
+    name: Cross-tool — Cypress smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: cypress-io/github-action@v6
+        with:
+          install-command: npm ci
+          start: npm run app:start
+          wait-on: 'http://127.0.0.1:3300/api/health'
+          wait-on-timeout: 60
+        env:
+          PORT: '3300'
+
+  selenium:
+    name: Cross-tool — Selenium smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run Selenium smoke
+        run: npm run test:selenium
+        env:
+          PORT: '3300'
