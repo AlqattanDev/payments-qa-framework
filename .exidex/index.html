@@ -568,6 +568,21 @@
     runAllBtn.onclick = runAll;
     buildTabs();
     selectScenario();
+
+    // Auto-play once when the lab first scrolls into view — opening the page
+    // shows the test running without anyone clicking. Respects reduced-motion.
+    if (!reduce) {
+      let played = false;
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !played) {
+            played = true; io.disconnect();
+            setTimeout(() => { if (!running) runScenario(); }, 500);
+          }
+        }
+      }, { threshold: 0.5 });
+      io.observe(document.querySelector(".qa-lab"));
+    }
   })();
   </script>
 </body>
