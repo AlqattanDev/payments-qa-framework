@@ -5,6 +5,9 @@
 [![Cucumber](https://img.shields.io/badge/Cucumber%20BDD-23D96C?logo=cucumber&logoColor=white)](https://cucumber.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 
+**▶ Live interactive demo: [exidex.dev/payments-qa](https://exidex.dev/payments-qa)** — watch a
+test drive the app and verify the ledger, right in your browser.
+
 An end-to-end test-automation framework built **from the ground up** for a fintech
 payments platform. It drives a real (if small) payments app — sign-in, money
 transfers, a validation gauntlet, a SQLite ledger — and verifies behaviour at
