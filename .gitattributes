@@ -1,0 +1,5 @@
+# The showcase landing page (exidex.dev/payments-qa) is a generated artifact,
+# not part of the test framework — it was outweighing the actual code and making
+# GitHub label this repo "HTML".
+.exidex/** linguist-vendored
+docs/** linguist-documentation
