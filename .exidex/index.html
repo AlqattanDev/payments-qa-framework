@@ -551,30 +551,39 @@
       return ok;
     }
 
-    async function runAll() {
+    /* Runs every scenario back to back and ends on the suite roll-up. `stop` lets
+       the auto-play caller bail the moment the visitor takes over. */
+    async function runAll(stop = () => false) {
       if (running) return;
       for (let i = 0; i < SCENARIOS.length; i++) {
+        if (stop()) return;
         current = i;
         [...tabsEl.children].forEach((b, j) => b.setAttribute("aria-selected", j === i ? "true" : "false"));
         const ok = await runScenario();
         if (!ok) return;
         await sleep(500);
       }
+      if (stop()) return;
       verdictEl.className = "qa-verdict pass";
       verdictEl.textContent = "✓ 3 / 3 scenarios passed — in the real suite: 15 / 15";
     }
 
     runBtn.onclick = runScenario;
-    runAllBtn.onclick = runAll;
+    runAllBtn.onclick = () => runAll();
     buildTabs();
     selectScenario();
 
-    // Auto-play once shortly after load — opening the page shows the test
-    // running without anyone clicking. Prefer "when the lab is on screen", with
-    // a plain fallback so it always fires. Respects reduced-motion.
+    // Auto-play once shortly after load — opening the page shows the test running
+    // without anyone clicking. It runs the WHOLE suite: scenario 1 lands the hook
+    // in seconds, then 2 and 3 roll on so the demo finishes on "3 / 3 — in the real
+    // suite: 15 / 15" instead of a lone green tick. Prefer "when the lab is on
+    // screen", with a plain fallback so it always fires. Any click on the tabs or
+    // run buttons hands control back to the visitor. Respects reduced-motion.
     if (!reduce) {
-      let played = false;
-      const go = () => { if (played) return; played = true; if (!running) runScenario(); };
+      let played = false, taken = false;
+      const takeOver = () => { taken = true; };
+      [tabsEl, runBtn, runAllBtn].forEach((el) => el.addEventListener("pointerdown", takeOver));
+      const go = () => { if (played) return; played = true; if (!running && !taken) runAll(() => taken); };
       const io = new IntersectionObserver((entries) => {
         if (entries.some((e) => e.isIntersecting)) { io.disconnect(); setTimeout(go, 400); }
       }, { threshold: 0.1 });
