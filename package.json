@@ -1,6 +1,7 @@
 {
   "name": "payments-qa-framework",
   "version": "1.0.0",
+  "private": true,
   "description": "End-to-end test automation for a fintech payments platform: Playwright + Cucumber BDD with API and database layers, gated in CI.",
   "type": "commonjs",
   "engines": {
@@ -17,18 +18,6 @@
     "test:selenium": "node scripts/with-app.js node selenium/smoke.test.js",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "test-automation",
-    "playwright",
-    "cucumber",
-    "bdd",
-    "cypress",
-    "selenium",
-    "api-testing",
-    "fintech",
-    "payments",
-    "ci-cd"
-  ],
   "author": "Ali AlQattan",
   "license": "MIT",
   "dependencies": {
