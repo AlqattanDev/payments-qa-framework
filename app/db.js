@@ -1,12 +1,9 @@
 'use strict';
 
 /**
- * Ledgerline data layer.
- *
- * A small double-entry-style ledger backed by SQLite. The framework's database
- * assertions query these exact tables read-only to prove that a UI or API
- * action actually moved money — the kind of "does the system of record agree
- * with the screen?" check that matters on a payments platform.
+ * Ledgerline data layer: a small double-entry-style ledger on SQLite. The
+ * framework's DB assertions read these exact tables to check that a UI or API
+ * action really moved money.
  */
 
 const path = require('path');
@@ -55,8 +52,8 @@ function migrate() {
   `);
 }
 
-// Deterministic seed — every reset yields the identical starting ledger so
-// tests are repeatable and independent of run order.
+// Every reset yields the identical starting ledger, so tests are repeatable and
+// independent of run order.
 const SEED = {
   users: [
     { username: 'alice', password: 'Password123!', display_name: 'Alice Rahman' },
@@ -115,9 +112,8 @@ function getPayment(id) {
 // --- Write helper -----------------------------------------------------------
 
 /**
- * Atomically debit `from`, credit `to`, and record the payment. Balance and
- * ledger row move together or not at all — the invariant the DB-layer tests
- * assert on.
+ * Debit `from`, credit `to`, record the payment. Balances and ledger row move
+ * together or not at all.
  */
 function postPayment({ fromAccount, toAccount, amountCents, currency, reference }) {
   const tx = db.transaction(() => {

@@ -1,8 +1,7 @@
 @ui
 Feature: Sending a payment
-  A completed transfer must be true in two places at once: what the customer
-  sees on screen, and what the ledger of record holds. These scenarios assert
-  both — the UI outcome and the database state behind it.
+  A completed transfer has to be true in two places: what the customer sees on
+  screen, and what the ledger holds. These scenarios assert both.
 
   Background:
     Given I am signed in as "alice"

@@ -2,11 +2,10 @@
 
 /**
  * Boot the Ledgerline app, wait until it is healthy, run the command passed as
- * arguments, then shut the app down — propagating the command's exit code.
+ * arguments, then shut the app down, propagating the command's exit code.
  *
- * The Playwright+Cucumber suite boots the app itself via a hook; the Cypress
- * and Selenium runners do not, so they go through this wrapper. One command to
- * run either tool, no "start the server first" step.
+ * The Cucumber suite boots the app itself from a hook; the Cypress and Selenium
+ * runners do not, so they go through this wrapper.
  *
  *   node scripts/with-app.js npx cypress run
  */

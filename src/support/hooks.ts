@@ -28,8 +28,8 @@ AfterAll(async function () {
   await stopApp();
 });
 
-// A fresh browser context + a reseeded ledger before every scenario. Isolation
-// is what makes scenarios order-independent and safe to run in parallel.
+// Fresh browser context and a reseeded ledger before every scenario, which is
+// what makes them order-independent and safe to run in parallel.
 Before(async function (this: PaymentsWorld) {
   this.browser = browser;
   this.context = await browser.newContext();
@@ -45,8 +45,8 @@ Before(async function (this: PaymentsWorld) {
   }
 });
 
-// On failure, capture a screenshot and attach it to the report. This is the
-// evidence that turns "a test failed" into "here is exactly what the user saw."
+// On failure, attach a screenshot to the report so a red step comes with the
+// screen that produced it.
 After(async function (this: PaymentsWorld, scenario: ITestCaseHookParameter) {
   if (scenario.result?.status === Status.FAILED && this.page) {
     const png = await this.page.screenshot({ fullPage: true });

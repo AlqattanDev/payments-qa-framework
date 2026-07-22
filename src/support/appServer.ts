@@ -2,14 +2,9 @@ import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import http from 'http';
 
-/**
- * Boots the Ledgerline app as a child process for the duration of a test run
- * and tears it down after. Making the suite own its System Under Test is what
- * lets `npm test` be a single self-contained command locally and in CI — no
- * "remember to start the server first" footgun.
- *
- * Skipped automatically when TEST_ENV targets a deployed instance (uat).
- */
+// Runs the Ledgerline app as a child process for the duration of a test run, so
+// `npm test` is self-contained. Skipped when TEST_ENV targets a deployed
+// instance (uat).
 
 let proc: ChildProcess | null = null;
 

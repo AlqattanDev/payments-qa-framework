@@ -1,9 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 
-/**
- * Page Object for the authenticated dashboard: account balances, the payment
- * form, and the payment history table.
- */
+/** Authenticated dashboard: balances, the payment form, payment history. */
 export class DashboardPage {
   private readonly fromAccount: Locator;
   private readonly toAccount: Locator;
@@ -46,8 +43,8 @@ export class DashboardPage {
     await this.currency.selectOption(input.currency);
     await this.reference.fill(input.reference);
     await this.submit.click();
-    // Settle on an outcome before returning. Without this, a following step
-    // could interact while the async submit is still resetting the form.
+    // Settle on an outcome first, or a following step can interact while the
+    // async submit is still resetting the form.
     await Promise.race([
       this.success.waitFor({ state: 'visible' }),
       this.error.waitFor({ state: 'visible' }),
@@ -62,10 +59,6 @@ export class DashboardPage {
   async expectError(message: string | RegExp): Promise<void> {
     await expect(this.error).toBeVisible();
     await expect(this.error).toContainText(message);
-  }
-
-  historyRow(paymentIdOrAccount: string): Locator {
-    return this.page.getByTestId(`payment-row-${paymentIdOrAccount}`);
   }
 
   async expectHistoryContains(reference: string): Promise<void> {

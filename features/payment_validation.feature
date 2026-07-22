@@ -1,8 +1,7 @@
 @ui
 Feature: Payment validation
-  Every payment runs a validation gauntlet before a single cent moves. Each rule
-  below protects the ledger from an invalid or unauthorized transfer, and each
-  row is one guarded doorway a real payments platform must keep shut.
+  Every payment is validated before any money moves. One row per rule that
+  protects the ledger from an invalid or unauthorized transfer.
 
   Background:
     Given I am signed in as "alice"

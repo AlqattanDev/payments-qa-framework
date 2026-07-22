@@ -1,10 +1,5 @@
-/**
- * Environment configuration.
- *
- * One framework, many targets. `TEST_ENV` selects a profile so the same suite
- * runs against a locally-booted app in CI or a deployed instance in a shared
- * environment — the multi-env shape a real SDLC (dev → sit → uat) needs.
- */
+// `TEST_ENV` picks a profile so the same suite can run against a locally booted
+// app or a deployed instance.
 
 export type EnvName = 'local' | 'ci' | 'uat';
 

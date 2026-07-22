@@ -1,7 +1,6 @@
 'use strict';
 
-// Minimal vanilla client for Ledgerline. No framework on purpose — the star of
-// this repo is the test framework, not the app it drives.
+// Minimal vanilla client for Ledgerline. No framework on purpose.
 
 const state = { token: null, user: null };
 

@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
 
-// Cross-tool proficiency smoke: the same sign-in → pay → verify journey the
-// Cucumber suite owns, expressed in Cypress. Proves the framework's patterns
-// (data-testid selectors, ledger reset for isolation) carry across runners.
+// The same sign-in, pay, verify journey the Cucumber suite owns, written in
+// Cypress. The shared data-testid selectors and the ledger-reset endpoint carry
+// straight across runners.
 
-describe('Ledgerline payments — Cypress smoke', () => {
+describe('Ledgerline payments (Cypress smoke)', () => {
   beforeEach(() => {
     cy.request('POST', '/api/test/reset'); // isolate every test from the last
   });

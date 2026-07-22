@@ -1,12 +1,7 @@
 import { APIRequestContext, request, APIResponse } from '@playwright/test';
 
-/**
- * Thin, typed client over the Ledgerline HTTP API.
- *
- * The same client backs both the API-level BDD scenarios and the setup work UI
- * scenarios need (seeding, logging in out-of-band). Keeping HTTP concerns here
- * — not sprinkled through step definitions — is the point of a service layer.
- */
+// Typed client over the Ledgerline HTTP API. Backs the API-level scenarios and
+// the out-of-band setup the UI scenarios need (reseeding, logging in).
 
 export interface LoginResult {
   token: string;
@@ -46,7 +41,7 @@ export class PaymentsApiClient {
     return this.token ? { Authorization: `Bearer ${this.token}` } : {};
   }
 
-  /** Reseed the ledger to its deterministic baseline. Called from the Before hook. */
+  /** Reseed the ledger to its baseline. Called from the Before hook. */
   async resetLedger(): Promise<void> {
     const res = await this.ctx.post('/api/test/reset');
     if (!res.ok()) throw new Error(`Ledger reset failed: HTTP ${res.status()}`);

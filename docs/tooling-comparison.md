@@ -1,57 +1,53 @@
-# Selenium vs Cypress vs Playwright — and where Cucumber fits
+# Selenium vs Cypress vs Playwright, and where Cucumber fits
 
-An interview cheat-sheet. The role names all four; here's how they actually
-relate and how to talk about them without hand-waving.
+Notes on why this repo is built the way it is.
 
-## The one-line mental model
+## The distinction people get wrong
 
-- **Selenium, Cypress, Playwright** are *how you drive the browser*. Pick one.
-- **Cucumber** is *how you describe the test in business language* (BDD). It sits
-  **on top of** whichever driver you chose — it is not an alternative to them.
+Selenium, Cypress and Playwright are all ways to drive a browser. You pick one.
+Cucumber is how you describe the test in business language, and it sits on top
+of whichever driver you chose. It is not an alternative to them.
 
-So a real stack is "**Cucumber + Playwright**" or "**Cucumber + Selenium**", never
-"Cucumber vs Playwright." This repo pairs Cucumber with Playwright, and adds a
+So a real stack is "Cucumber + Playwright" or "Cucumber + Selenium", never
+"Cucumber vs Playwright". This repo pairs Cucumber with Playwright and adds a
 Cypress and a Selenium smoke to show the same journey ports across drivers.
 
-## The three drivers, head to head
+## The three drivers
 
 | | Selenium | Cypress | Playwright |
 |---|---|---|---|
-| **Architecture** | W3C WebDriver, out-of-process | Runs inside the browser event loop | Chrome DevTools Protocol, out-of-process |
-| **Languages** | Java, C#, Python, JS, Ruby… | JavaScript/TypeScript only | JS/TS, Python, Java, C# |
-| **Browsers** | All major + real Safari/IE-era estates | Chromium, Firefox, WebKit-ish | Chromium, Firefox, WebKit |
-| **Waiting** | Manual/explicit waits (classic flake source) | Auto-retries commands | Auto-waits on actionability |
-| **Cross-origin / tabs** | Full support | Historically limited | Full support |
-| **API testing** | No (separate lib) | Yes (`cy.request`) | Yes (built-in request context) |
-| **Parallelism** | Via Grid / runner | Paid dashboard or plugins | Built-in, free |
-| **Best when** | Broad browser/language matrix, legacy | Fast dev feedback, component tests | New suites wanting speed + breadth |
+| Architecture | W3C WebDriver, out of process | Runs inside the browser event loop | CDP, out of process |
+| Languages | Java, C#, Python, JS, Ruby | JavaScript/TypeScript only | JS/TS, Python, Java, C# |
+| Browsers | All major, plus older estates | Chromium, Firefox, WebKit-ish | Chromium, Firefox, WebKit |
+| Waiting | Manual or explicit waits | Auto-retries commands | Auto-waits on actionability |
+| Cross-origin and tabs | Full support | Historically limited | Full support |
+| API testing | Separate library | Yes (`cy.request`) | Yes (built-in request context) |
+| Parallelism | Grid or runner | Paid dashboard or plugins | Built in, free |
+| Best when | Broad browser/language matrix, legacy | Fast dev feedback, component tests | New suites wanting speed and breadth |
 
 ## Why Playwright is the default here
 
-1. **One tool, UI + API.** The same library drives the browser *and* makes HTTP
-   calls, so the UI and API layers share one dependency and one mental model.
-2. **Auto-waiting kills the #1 flake source.** No `sleep`, no brittle explicit
-   waits — it waits for elements to be actionable.
-3. **Free parallelism and tracing** out of the box.
+One library drives the browser and makes the HTTP calls, so the UI and API
+layers share a dependency and a mental model. Auto-waiting removes the biggest
+single source of flake, with no `sleep` and no hand-tuned explicit waits. And
+parallelism and tracing come for free.
 
-## Why Selenium still matters
+## Where the other two still win
 
-Enterprises (banks especially) run large **legacy** Selenium estates and need a
-broad browser/language matrix. Knowing Selenium means you can maintain what
-exists and migrate it deliberately — not rewrite blindly. Its cost is manual
-waits and more setup, which is exactly the flake Playwright/Cypress designed away.
+Selenium: enterprises, banks especially, run large legacy estates and need a
+broad browser and language matrix. Knowing it means you can maintain and migrate
+what exists rather than rewrite it blindly. The cost is manual waits and more
+setup, which is exactly the flake the newer tools designed away.
 
-## Why Cypress earns its place
+Cypress: excellent developer experience for fast feedback and component tests,
+with time-travel debugging. Being JS-only, single-tab, and historically weaker
+on cross-origin is why it's a smoke here rather than the backbone.
 
-Superb developer experience for fast feedback and component testing, with
-time-travel debugging. Its trade-offs — JS-only, one browser tab, historically
-weaker cross-origin — are why it's a smoke here rather than the backbone.
+## Picking one for a new payments suite
 
-## How to answer "which would you pick?"
-
-> "For a new payments suite I'd default to **Playwright + Cucumber**: Cucumber so
-> QA and business can read and review the scenarios, Playwright for fast,
-> low-flake execution across UI and API in one tool. If the org already had a big
-> **Selenium** estate I'd keep and modernise it rather than rewrite, and lean on
-> **Cypress** where developers want quick component-level feedback. The driver is
-> an implementation detail below the Gherkin — which is the point of BDD."
+Playwright plus Cucumber: Cucumber so QA and business can read and review the
+scenarios, Playwright for fast, low-flake execution across UI and API in one
+tool. An org with a large Selenium estate is better served by modernising it
+than rewriting it, and Cypress earns its place where developers want quick
+component-level feedback. The driver is an implementation detail below the
+Gherkin, which is rather the point of BDD.

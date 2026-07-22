@@ -1,12 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 
-/**
- * Page Object for the sign-in screen.
- *
- * Selectors live here and nowhere else. When the UI changes, one file changes,
- * not fifty step definitions — that encapsulation is the whole reason page
- * objects exist. Steps read as intent ("sign in as Alice"); the how stays here.
- */
+/** Sign-in screen. All of its selectors live here and nowhere else. */
 export class LoginPage {
   private readonly username: Locator;
   private readonly password: Locator;

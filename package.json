@@ -1,7 +1,7 @@
 {
   "name": "payments-qa-framework",
   "version": "1.0.0",
-  "description": "End-to-end test-automation framework for a fintech payments platform — Playwright + Cucumber BDD, API and database layers, CI-gated. Built to mirror real payment-platform QA.",
+  "description": "End-to-end test automation for a fintech payments platform: Playwright + Cucumber BDD with API and database layers, gated in CI.",
   "type": "commonjs",
   "engines": {
     "node": ">=20"
@@ -15,7 +15,6 @@
     "test:ui": "cucumber-js --tags @ui",
     "test:cypress": "node scripts/with-app.js npx cypress run",
     "test:selenium": "node scripts/with-app.js node selenium/smoke.test.js",
-    "report": "node src/support/report.js",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

@@ -1,6 +1,5 @@
-// Cucumber-JS runtime configuration. ts-node compiles the TypeScript step
-// definitions and support code on the fly, so there is no build step to run
-// the suite. The HTML and JSON formatters produce the shareable report.
+// ts-node compiles the step definitions and support code on the fly, so running
+// the suite needs no build step.
 module.exports = {
   default: {
     requireModule: ['ts-node/register'],

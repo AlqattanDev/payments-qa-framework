@@ -2,13 +2,13 @@ import { Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { PaymentsWorld } from '../../src/support/world';
 
-/** "100.00" -> 10000 cents. Kept in one place so money math never drifts. */
+/** "100.00" -> 10000 cents. One place, so the money maths can't drift. */
 export function dollarsToCents(amount: string): number {
   return Math.round(parseFloat(amount) * 100);
 }
 
-// Database-of-record assertions. Shared by UI and API features: whichever path
-// created the payment, the ledger must agree.
+// Ledger assertions, shared by the UI and API features: whichever path created
+// the payment, the database has to agree.
 
 Then(
   'the ledger balance of {string} should be {string} {word}',

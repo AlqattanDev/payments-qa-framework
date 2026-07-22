@@ -1,8 +1,7 @@
 const { defineConfig } = require('cypress');
 
-// Cypress runs one cross-tool smoke against the same app. Its job in this repo
-// is proficiency evidence, not primary coverage — the Playwright + Cucumber
-// suite is where the real breadth lives.
+// Cypress runs a cross-tool smoke against the same app. The Playwright +
+// Cucumber suite carries the actual coverage.
 module.exports = defineConfig({
   e2e: {
     baseUrl: process.env.BASE_URL || 'http://127.0.0.1:3300',

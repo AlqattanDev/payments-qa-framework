@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_showcase/style.css" />
 
   <style>
-    /* ── Page-local design. Scoped under .qa- so nothing leaks into the shared
-       chrome. Colours come from exidex tokens; green accent = "tests pass". ── */
+    /* Page-local, scoped under .qa- so nothing leaks into the shared chrome.
+       Colours come from the exidex tokens. */
     :root {
       --qa-pass: #36c46f;
       --qa-fail: #f54e00;
@@ -39,7 +39,7 @@
     .qa-section > h2 { font-size: 1.35rem; margin: 0 0 .3rem; }
     .qa-section > .qa-sub { color: var(--qa-dim); margin: 0 0 1.1rem; font-size: .95rem; }
 
-    /* ── The lab: split app ↔ spec ─────────────────────────────────────────── */
+    /* The lab: app on the left, spec on the right */
     .qa-lab {
       border: 1px solid var(--qa-line);
       border-radius: 14px;
@@ -105,7 +105,7 @@
     @keyframes qa-in { from { opacity: 0; transform: translateY(4px); } }
     .qa-hist .row .pill { color: var(--qa-pass); font-weight: 600; }
 
-    /* The "robot" cursor that drives the form */
+    /* The cursor that drives the form */
     .qa-cursor {
       position: absolute; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none;
       opacity: 0; transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .2s; z-index: 5;
@@ -135,7 +135,7 @@
     .qa-verdict.pass { color: var(--qa-pass); }
     .qa-verdict.fail { color: var(--qa-fail); }
 
-    /* ── Terminal / CI card (dark in both themes, like the domain expects) ──── */
+    /* Terminal / CI card, dark in both themes */
     .qa-term {
       background: #0d1117; color: #e6edf3; border-radius: 10px; padding: 1rem 1.2rem;
       font: 13.5px/1.7 var(--font-code, ui-monospace, Menlo, monospace); overflow-x: auto;
@@ -143,7 +143,7 @@
     .qa-term .p { color: #36c46f; } .qa-term .ok { color: #3fb950; } .qa-term .dim { color: #8b949e; } .qa-term .b { color: #e6edf3; font-weight: 700; }
     .qa-term hr { border: none; border-top: 1px solid #21262d; margin: .7rem 0; }
 
-    /* ── Pyramid ───────────────────────────────────────────────────────────── */
+    /* Pyramid */
     .qa-pyramid { display: grid; gap: .3rem; max-width: 460px; }
     .qa-tier { display: grid; grid-template-columns: 1fr; padding: .55rem .8rem; border-radius: 8px; color: #05130b; }
     .qa-tier b { font-size: .86rem; } .qa-tier span { font-size: .74rem; opacity: .82; }
@@ -176,8 +176,8 @@
     <div class="sc-body">
       <p class="sc-kicker">QA · Test Automation</p>
       <h1 class="sc-title">Payments QA Framework</h1>
-      <p class="sc-tagline">An end-to-end automation suite for a fintech payments platform —
-        it drives the app, checks the screen, and verifies the
+      <p class="sc-tagline">An end-to-end automation suite for a fintech payments platform.
+        It drives the app, checks the screen, and verifies the
         <span class="sc-marker">ledger of record</span>.</p>
 
       <div class="sc-pills">
@@ -193,7 +193,7 @@
       <section class="qa-section">
         <h2>Watch a test drive the app</h2>
         <p class="qa-sub">Pick a scenario and hit Run. The test fills the form, sends the
-          payment, and checks both the screen <em>and</em> the database — live.</p>
+          payment, and checks the screen and the database as it goes.</p>
 
         <div class="qa-lab">
           <div class="qa-toolbar">
@@ -242,10 +242,10 @@
             </div>
           </div>
         </div>
-        <p class="qa-note"><b>Honest note:</b> this page runs an in-browser twin of the app so
-          the tests can play out in front of you. The real suite drives a real Chromium via
-          Playwright against an Express + SQLite backend — proven by the green CI below, not by
-          this animation.</p>
+        <p class="qa-note"><b>Worth saying:</b> this page runs an in-browser twin of the app so
+          the tests can play out in front of you. The real suite drives Chromium through
+          Playwright against an Express + SQLite backend. The CI below is the proof, not this
+          animation.</p>
       </section>
 
       <!-- ── REAL RUN / CI ────────────────────────────────────────────────── -->
@@ -260,37 +260,37 @@
 <span class="b">64 steps</span> (<span class="ok">64 passed</span>)
 <hr />
 <span class="dim">GitHub Actions · every push &amp; PR</span>
-<span class="ok">✓</span> BDD — Playwright + Cucumber  <span class="dim">(UI · API · DB)</span>
-<span class="ok">✓</span> Cross-tool — Cypress smoke
-<span class="ok">✓</span> Cross-tool — Selenium smoke
+<span class="ok">✓</span> BDD  <span class="dim">(UI · API · DB)</span>
+<span class="ok">✓</span> Cypress smoke
+<span class="ok">✓</span> Selenium smoke
         </div>
       </section>
 
       <!-- ── ARCHITECTURE ─────────────────────────────────────────────────── -->
       <section class="qa-section">
         <h2>How it's built</h2>
-        <p class="qa-sub">A deliberate test pyramid: many fast checks low down, a few real
-          browser journeys on top. On a payments system, the database is the tie-breaker.</p>
+        <p class="qa-sub">A test pyramid: many fast checks low down, a few real browser
+          journeys on top. On a payments system the database is the tie-breaker.</p>
 
         <div class="qa-pyramid">
-          <div class="qa-tier ui"><b>UI · browser</b><span>Playwright journeys — sign-in, transfers, validation</span></div>
+          <div class="qa-tier ui"><b>UI · browser</b><span>Playwright journeys: sign-in, transfers, validation</span></div>
           <div class="qa-tier api"><b>API · HTTP</b><span>Status &amp; error codes, pinned as a contract</span></div>
           <div class="qa-tier db"><b>DB · ledger</b><span>Balances + the "total money never changes" invariant</span></div>
         </div>
 
         <table class="qa-map">
-          <thead><tr><th>The role asked for</th><th>Where it lives</th></tr></thead>
+          <thead><tr><th>Tool</th><th>Where it lives</th></tr></thead>
           <tbody>
             <tr><td>Playwright</td><td><code>src/pages</code>, <code>src/api</code>, <code>src/support</code></td></tr>
             <tr><td>Cucumber (BDD)</td><td><code>features/*.feature</code> + step definitions</td></tr>
             <tr><td>Cypress</td><td><code>cypress/e2e/smoke.cy.js</code></td></tr>
             <tr><td>Selenium</td><td><code>selenium/smoke.test.js</code></td></tr>
-            <tr><td>SDLC · CI/CD</td><td><code>.github/workflows/ci.yml</code> — typecheck + all suites</td></tr>
-            <tr><td>RDBMS</td><td><code>src/db/LedgerDb.ts</code> — read-only ledger assertions</td></tr>
+            <tr><td>CI</td><td><code>.github/workflows/ci.yml</code>, typecheck + all suites</td></tr>
+            <tr><td>Database</td><td><code>src/db/LedgerDb.ts</code>, read-only ledger assertions</td></tr>
           </tbody>
         </table>
-        <p class="qa-note">Framework built <b>from the ground up</b>: Page Objects, a custom
-          Cucumber World, per-scenario isolation, multi-environment config, screenshot-on-failure.</p>
+        <p class="qa-note">Page Objects, a custom Cucumber World, per-scenario isolation,
+          multi-environment config, screenshot on failure.</p>
       </section>
 
       <div class="sc-actions">
@@ -307,7 +307,7 @@
 
   <script>
   (() => {
-    // ── In-browser twin of the app: the SAME validation rules as app/server.js ──
+    // In-browser twin of the app, running the same validation rules as app/server.js.
     const CUR = new Set(["USD", "EUR", "GBP"]);
     const BASELINE = {
       "ACC-1001": { name: "Alice Checking", currency: "USD", balance: 500000, owned: true },
@@ -349,7 +349,7 @@
 
     function totalCents() { return Object.values(accts).reduce((s, a) => s + a.balance, 0); }
 
-    // ── DOM ──────────────────────────────────────────────────────────────────
+    // DOM
     const $ = (id) => document.getElementById(id);
     const app = $("qa-app"), cursor = $("qa-cursor");
     const fFrom = $("f-from"), fTo = $("f-to"), fAmt = $("f-amount"), fRef = $("f-ref"), fSend = $("f-send");
@@ -400,7 +400,7 @@
       if (!el) return; el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 900);
     }
 
-    // ── "Robot" driving: move cursor, type, click ──────────────────────────────
+    // Driving the form: move the cursor, type, click.
     async function moveTo(el) {
       const a = app.getBoundingClientRect(), b = el.getBoundingClientRect();
       const x = b.left - a.left + b.width / 2 - 4, y = b.top - a.top + b.height / 2 - 2;
@@ -423,7 +423,7 @@
     }
     function clearHl() { document.querySelectorAll(".qa-field").forEach((f) => f.classList.remove("hl")); }
 
-    // The action a "When I send…" step performs: drive the form, then submit → validate.
+    // What a "When I send…" step does: fill the form, submit, validate.
     async function driveSend(p, uiAmount) {
       await moveTo(fFrom); await pick(fFrom, p.from);
       await moveTo(fTo); await type(fTo, p.to);
@@ -441,7 +441,7 @@
       return res;
     }
 
-    // ── Scenarios: each step has a run() that acts and asserts (throws on fail) ──
+    // Each step has a run() that acts and asserts, and throws if it fails.
     const money = (c) => "$" + dollars(c);
     const SCENARIOS = [
       {
@@ -551,8 +551,8 @@
       return ok;
     }
 
-    /* Runs every scenario back to back and ends on the suite roll-up. `stop` lets
-       the auto-play caller bail the moment the visitor takes over. */
+    /* Runs every scenario back to back and ends on the roll-up. `stop` lets the
+       auto-play caller bail the moment the visitor takes over. */
     async function runAll(stop = () => false) {
       if (running) return;
       for (let i = 0; i < SCENARIOS.length; i++) {
@@ -573,12 +573,11 @@
     buildTabs();
     selectScenario();
 
-    // Auto-play once shortly after load — opening the page shows the test running
-    // without anyone clicking. It runs the WHOLE suite: scenario 1 lands the hook
-    // in seconds, then 2 and 3 roll on so the demo finishes on "3 / 3 — in the real
-    // suite: 15 / 15" instead of a lone green tick. Prefer "when the lab is on
-    // screen", with a plain fallback so it always fires. Any click on the tabs or
-    // run buttons hands control back to the visitor. Respects reduced-motion.
+    // Auto-play shortly after load so opening the page already shows a test
+    // running. All three scenarios, so it finishes on the roll-up rather than a
+    // lone green tick. Fires when the lab scrolls into view, with a timeout
+    // fallback in case the observer never does. Any click on the tabs or run
+    // buttons hands control back to the visitor.
     if (!reduce) {
       let played = false, taken = false;
       const takeOver = () => { taken = true; };

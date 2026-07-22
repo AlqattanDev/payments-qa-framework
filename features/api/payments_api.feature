@@ -1,8 +1,8 @@
 @api
 Feature: Payments API
-  The HTTP API is the contract the web UI and any partner integration depend on.
-  Testing it directly is faster and lower in the pyramid than driving a browser,
-  and it pins the contract — status codes, error codes, and ledger effects.
+  The HTTP API is the contract the web UI and any integration depends on.
+  Hitting it directly is faster than driving a browser and pins the contract:
+  status codes, error codes, and the ledger effect.
 
   Background:
     Given the API ledger is reset

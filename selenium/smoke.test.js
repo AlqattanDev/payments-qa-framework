@@ -1,13 +1,10 @@
 'use strict';
 
 /**
- * Cross-tool proficiency smoke in Selenium WebDriver — the industry-standard,
- * W3C-protocol driver the role names alongside Playwright and Cypress.
- *
- * Same journey as the Cucumber and Cypress smokes: reset the ledger, sign in,
- * send a payment, assert the on-screen result. selenium-webdriver 4's Selenium
- * Manager resolves chromedriver automatically. A plain script (no test runner)
- * keeps the dependency surface minimal; it exits non-zero on any failure.
+ * The same journey as the Cucumber and Cypress smokes, in Selenium WebDriver:
+ * reset the ledger, sign in, send a payment, assert the on-screen result.
+ * selenium-webdriver 4 resolves chromedriver itself. Plain script rather than a
+ * test runner to keep the dependency surface small; exits non-zero on failure.
  */
 
 const http = require('http');
@@ -53,6 +50,16 @@ async function css(driver, testId) {
 
     const dashboard = await css(driver, 'dashboard-view');
     await driver.wait(until.elementIsVisible(dashboard), 10000);
+
+    // The dashboard renders before its data arrives, so the account dropdown is
+    // briefly empty. Typing into the form before then submits a blank source
+    // account. This is the explicit wait Playwright would have done for us.
+    const fromAccount = await css(driver, 'from-account');
+    await driver.wait(
+      async () => (await fromAccount.getAttribute('value')) !== '',
+      10000,
+      'accounts never loaded into the payment form'
+    );
 
     await (await css(driver, 'to-account')).sendKeys('ACC-2001');
     await (await css(driver, 'amount')).sendKeys('60.00');

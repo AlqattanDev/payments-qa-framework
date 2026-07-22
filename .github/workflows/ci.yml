@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Primary suite: the Playwright + Cucumber BDD tests across the UI, the API,
-  # and the SQLite ledger — plus a strict TypeScript typecheck as the gate.
+  # Primary suite: the Cucumber tests across the UI, the API and the ledger,
+  # gated on a strict typecheck.
   bdd:
-    name: BDD — Playwright + Cucumber (UI · API · DB)
+    name: BDD (UI, API, DB)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,10 +36,10 @@ jobs:
           path: reports/
           if-no-files-found: ignore
 
-  # Cross-tool proficiency: the same journeys expressed in Cypress and Selenium,
-  # kept in separate jobs so a single tool's hiccup never masks the primary run.
+  # The same journey in Cypress and Selenium, in separate jobs so one tool's
+  # hiccup never masks the primary run.
   cypress:
-    name: Cross-tool — Cypress smoke
+    name: Cypress smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
           PORT: '3300'
 
   selenium:
-    name: Cross-tool — Selenium smoke
+    name: Selenium smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

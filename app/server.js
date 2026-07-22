@@ -1,12 +1,10 @@
 'use strict';
 
 /**
- * Ledgerline — a deliberately small fintech payments API + web UI that exists
- * only to be the System Under Test for the automation framework in this repo.
- *
- * It is intentionally realistic where it counts: token auth, ownership checks,
- * a validation gauntlet on every payment, and a SQLite ledger that must stay
- * consistent. It is intentionally trivial everywhere else.
+ * Ledgerline: a small payments API and web UI that exists to be the system
+ * under test for the automation framework in this repo. Realistic where it
+ * counts (token auth, ownership checks, payment validation, a SQLite ledger
+ * that has to stay consistent) and trivial everywhere else.
  */
 
 const path = require('path');
@@ -74,7 +72,7 @@ app.get('/api/payments/:id', authed, (req, res) => {
 app.post('/api/payments', authed, (req, res) => {
   const { fromAccount, toAccount, amountCents, currency, reference } = req.body || {};
 
-  // --- Validation gauntlet. Each branch maps to a BDD scenario. ---
+  // Each branch below maps to a scenario in the suite.
   if (!fromAccount || !toAccount || amountCents === undefined || amountCents === null || !currency) {
     return fail(res, 400, 'MISSING_FIELD', 'fromAccount, toAccount, amountCents and currency are required.');
   }
@@ -106,10 +104,9 @@ app.post('/api/payments', authed, (req, res) => {
   res.status(201).json({ payment: serializePayment(payment) });
 });
 
-// Test-support endpoint: reseed the ledger to a known baseline. In a real
-// system this lives behind an env flag / test-only route; here the whole app
-// is a test fixture, so it is always available and the framework calls it in a
-// Before hook to keep scenarios independent.
+// Reseed the ledger to a known baseline. In a real system this would sit behind
+// an env flag; here the whole app is a fixture, so it is always available and
+// the suite calls it in a Before hook.
 app.post('/api/test/reset', (req, res) => {
   store.reset();
   sessions.clear();

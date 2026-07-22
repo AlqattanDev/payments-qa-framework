@@ -7,10 +7,9 @@ import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
 
 /**
- * The Cucumber World is the per-scenario context. One fresh instance per
- * scenario keeps state from leaking between tests. It owns the browser page,
- * the page objects, the API client, and a scratch bag for values a scenario
- * needs to carry across steps (e.g. the ID of a payment it just created).
+ * Per-scenario context. Cucumber builds a fresh instance for every scenario, so
+ * nothing leaks between tests. Holds the browser page, the page objects, the API
+ * client, and a scratch bag for values that have to survive between steps.
  */
 export class PaymentsWorld extends World {
   readonly env: EnvConfig;
@@ -50,8 +49,8 @@ export class PaymentsWorld extends World {
   }
 
   /**
-   * Run a query against a fresh read-only ledger connection and close it. A new
-   * connection per assertion always sees the app's latest committed WAL state.
+   * Query the ledger on a fresh read-only connection, then close it. A new
+   * connection per assertion always sees the latest committed WAL state.
    */
   withLedger<T>(fn: (db: LedgerDb) => T): T {
     if (!this.env.dbPath) throw new Error('This environment has no local ledger for DB assertions.');
